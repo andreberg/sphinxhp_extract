@@ -1,0 +1,34 @@
+
+Sphinx Homepage Data Extractor
+
+
+TODO
+====
+
+
+Project
+
+- Rename sphinxhp to sphinxhp-data-extractor
+  
+  Take care to rename sys.path.insert's in the tests and
+  look for other places where the name is used in textual context.
+
+
+data.py
+
+- Provide working caching mechanism for Databases
+  
+  Use a module level dict instead, make sure __eq__ and __hash__ compare on 
+  site_url (think they already do) and check for existing db in __init__ or initialize. 
+  
+- Remove side effect of self.initialize() in some methods. 
+
+  Make call to initialize explicit and a responsibility of the user of the database.
+  Do this by instead checking for self.initialized == True and raising some error if 
+  an initialized state is needed.
+
+- Fix data_tests.py
+
+  I think some of the tests still work under the assumption that the db initializes 
+  itself on __init__.
+  

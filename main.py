@@ -229,6 +229,11 @@ USAGE
                     print("Writing List data to '%s'" % outdir)
                 writer = ListWriter(db, _outdir)
                 writer.write(include_comments=True)
+            elif format == 'listplain':
+                if verbose > 0:
+                    print("Writing List (plain) data to '%s'" % outdir)
+                writer = ListWriter(db, _outdir)
+                writer.write()
             else: # mode == 'stdout'
                 if len(epaths) == 0:
                     db.print_data(func=pprint)

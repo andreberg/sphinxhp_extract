@@ -255,7 +255,7 @@ class ListWriter(Writer):
             indent = '   '
         else:
             indent = ''
-        str_template = "%s'%s', "
+        str_template = '%s"%s", '
         cmt_template = ' # %s'
         if not epaths:
             epaths = self.database.expand_epath('data*')
@@ -269,6 +269,7 @@ class ListWriter(Writer):
             if include_comments is True:
                 final_lines = "[" + os.linesep + (os.linesep.join(cur_lines)) + os.linesep + "]"
             else:
+                cur_lines[-1] = cur_lines[-1][:-2]  # remove ', ' from last entry
                 final_lines = "[" + (''.join(cur_lines)) + "]"
             write_encoded(os.path.join(self.outdir, cur_fname), 
                           final_lines, encoding=self.encoding, errors="strict")
@@ -958,7 +959,7 @@ class SphinxDatabase(Database):
         ]
     }
     
-    VALID_FORMATS = ['csv', 'html', 'tmprefs', 'list'] 
+    VALID_FORMATS = ['csv', 'html', 'tmprefs', 'list', 'listplain'] 
     
     def primary_type(self, epath):
         ''' Return the primary type for the given epath.'''

@@ -69,7 +69,7 @@ except ImportError:
 __all__ = ['DataExtractor', 'SphinxDatabase', 'HTMLWriter', 'CSVWriter', 'TextMateWriter']
 
 __date__ = constants.__date__
-__updated__ = '2013-08-16'
+__updated__ = '2013-08-20'
 
 
 DEBUG = 0 or ('BMDebugLevel' in os.environ and os.environ['BMDebugLevel'] > 0)
@@ -693,7 +693,16 @@ class DataExtractor(object):
         for dl in dls:
             dl_class = dl.get('class')
             dts = dl.findall('./dt')
-            for dt in dts:
+            dtslen = len(dts)
+            if dtslen > 1:
+                # construct a 'see <name of last dt>' hint
+                # for sections that have a singular description
+                # for multiple definitions
+                last_dt = dts[-1]
+                last_dt_tt_name = last_dt.findtext('./tt')
+                desc = 'see %s' % str(last_dt_tt_name)
+            for i in range(0, dtslen):
+                dt = dts[i]
                 dt_id = dt.get('id')
                 tts = dt.findall('./tt')
                 tt_name = ''
@@ -712,42 +721,41 @@ class DataExtractor(object):
                     # use last link found for dl's that 
                     # don't have an anchored href
                     dt_link = last_link
-            desc = ''
-            depr = ''
-            since = '0.1'
-            dd = dl.find('./dd')
-            if dd is not None:
-                for sub in dd.itertext():
-                    if sub is not None:
-                        desc += sub
+                depr = ''
+                since = '0.1'
+                if i == dtslen-1:
+                    # assemble description for the last dt
+                    # since the docs sometimes include only
+                    # one description for a bunch of directives,
+                    # roles, etc...
+                    dd = dl.find('./dd')
+                    desc = ''
+                    if dd is not None:
+                        for sub in dd.itertext():
+                            if sub is not None:
+                                desc += sub
                 mat = re.search(DataExtractor.SINCE_REGEX, desc)
                 if mat:
                     since = mat.groupdict()['version']
                 mat = re.search(DataExtractor.DEPRECATED_REGEX, desc)
                 if mat: 
                     depr = mat.group(1)
-            entry = Entry({
-                'id': dt_id,
-                'name': tt_name,
-                'classname': tt_classname,
-                'description': desc,
-                'since': since,
-                'deprecated': depr,
-                'link': dt_link
-            }, 'id')
-            if dl_class in entries:
-                entries[dl_class].append(entry)
-            else:
-                entries[dl_class] = [entry]
-            if DEBUG:
-                print(entry)
-                #print "id    = %s" % dt_id
-                #print "name  = %s" % tt_name
-                #print "class = %s" % tt_classname
-                #print "desc. = %s" % desc
-                #print "depr. = %s" % depr
-                #print "since = %s" % since
-                #print "link  = %s" % dt_link
+                entry = Entry({
+                    'id': dt_id,
+                    'name': tt_name,
+                    'classname': tt_classname,
+                    'description': desc,
+                    'since': since,
+                    'deprecated': depr,
+                    'link': dt_link
+                }, 'id')
+
+                if dl_class in entries:
+                    entries[dl_class].append(entry)
+                else:
+                    entries[dl_class] = [entry]
+                if DEBUG:
+                    print(entry)
         return entries
         
 
@@ -955,6 +963,24 @@ class SphinxDatabase(Database):
             'markup/toctree.html',
             'markup/para.html',
             'markup/code.html',
+            'ext/api.html',
+            'ext/appapi.html',
+            'ext/autodoc.html',
+            'ext/autosummary.html',
+            'ext/builderapi.html',
+            'ext/coverage.html',
+            'ext/doctest.html',
+            'ext/extlinks.html',
+            'ext/graphviz.html',
+            'ext/ifconfig.html',
+            'ext/inheritance.html',
+            'ext/intersphinx.html',
+            'ext/math.html',
+            'ext/oldcmarkup.html',
+            'ext/refcounting.html',
+            'ext/todo.html',
+            'ext/tutorial.html',
+            'ext/viewcode.html',
             'templating.html'
         ]
     }
